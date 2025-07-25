@@ -1,0 +1,2 @@
+# GooseGoose-
+Metodova hra
