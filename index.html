@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IRL Goose Goose Duck</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #111;
+      color: #fff;
+      text-align: center;
+      padding: 30px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 18px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      background-color: #0f0;
+      color: #000;
+      cursor: pointer;
+    }
+    #qr {
+      margin-top: 20px;
+    }
+    .role {
+      font-size: 28px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>IRL Hra – Goose Goose Style 🦆</h1>
+
+  <input id="nameInput" placeholder="Tvoje meno" />
+  <input id="roomInput" placeholder="Kód miestnosti (napr. DUCK1)" />
+  <br>
+  <button onclick="generateQR()">🔗 Zdieľaj hru (QR)</button>
+  <button onclick="startGame()">🎲 Štart Game</button>
+
+  <div id="qr"></div>
+  <div class="role" id="roleDisplay"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script>
+    function generateQR() {
+      const room = document.getElementById('roomInput').value.trim();
+      if (!room) return alert("Zadaj najprv kód miestnosti");
+
+      const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(room)}`;
+      const qr = new QRious({
+        element: document.createElement('canvas'),
+        value: url,
+        size: 200
+      });
+      const qrDiv = document.getElementById("qr");
+      qrDiv.innerHTML = '';
+      qrDiv.appendChild(qr.element);
+    }
+
+    function startGame() {
+      const name = document.getElementById('nameInput').value.trim();
+      const room = document.getElementById('roomInput').value.trim().toUpperCase();
+
+      if (!name || !room) {
+        alert("Zadaj meno a kód miestnosti.");
+        return;
+      }
+
+      const hash = hashCode(name + room);
+      const maxPlayers = 7;
+      const roles = Array(maxPlayers).fill("Innocent");
+      roles[hash % maxPlayers] = "Imposter";
+
+      const role = roles[hash % maxPlayers];
+      document.getElementById('roleDisplay').innerText = `Tvoja rola: ${role}`;
+    }
+
+    function hashCode(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return Math.abs(hash);
+    }
+
+    // Ak sa otvára z QR, nastav rovno kód
+    window.onload = () => {
+      const params = new URLSearchParams(window.location.search);
+      const room = params.get('room');
+      if (room) document.getElementById('roomInput').value = room;
+    };
+  </script>
+</body>
+</html>
